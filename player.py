@@ -41,7 +41,7 @@ class Player(threading.Thread):
             r = retrieve_url(current)
             if r:
                 self._archive.append(current)
-                return r;
+                return r
 
     def append(self, command):
         """append new entry to playlist
@@ -82,11 +82,11 @@ class Player(threading.Thread):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Webdownloarding music-player')
-    parser.add_argument('-p','--playlist' , help='playlist-file', default='None')
+    parser.add_argument('-p','--playlist' , help='playlist-file', default=None)
     parser.add_argument('--paused' , help="start paused, input pause to start playing", action="store_true")
     args = parser.parse_args()
     l = []
-    if args.playlist:
+    if args and args.playlist:
         with open(args.playlist) as pl:
             l = [ line.rstrip() for line in pl ]
     p = Player(playlist=l, paused=args.paused)
