@@ -9,14 +9,18 @@ import argparse
 class Player(threading.Thread):
     """Docstring for Player """
 
-    def __init__(self, playlist=[], paused=False):
+    def __init__(self, playlist=[], paused=False, pulse=False):
         """"""
         self._playlist = []
         for entry in playlist:
             self.append(entry)
         self._pause = paused
         self._archive = []
-        self._p = mplayer.Player()
+        if pulse:
+            self._p = mplayer.Player(args="-ao pulse")
+        else:
+            self._p = mplayer.Player()
+
         threading.Thread.__init__(self)
         self.daemon = True
         self._current = None
@@ -83,12 +87,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Webdownloarding music-player')
     parser.add_argument('-p','--playlist' , help='playlist-file', default=None)
     parser.add_argument('--paused' , help="start paused, input pause to start playing", action="store_true")
+    parser.add_argument('--pulse' , help="activate the pulseaudio driver", action="store_true")
     args = parser.parse_args()
     l = []
     if args and args.playlist:
         with open(args.playlist) as pl:
             l = [ line.rstrip() for line in pl ]
-    p = Player(playlist=l, paused=args.paused)
+    p = Player(playlist=l, paused=args.paused, pulse=args.pulse)
     p.start()
     while True:
         s = raw_input()
