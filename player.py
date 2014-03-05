@@ -9,10 +9,12 @@ import argparse
 class Player(threading.Thread):
     """Docstring for Player """
 
-    def __init__(self, playlist=[]):
+    def __init__(self, playlist=[], paused=False):
         """"""
-        self._playlist = playlist
-        self._pause = False
+        self._playlist = []
+        for entry in playlist:
+            self.append(entry)
+        self._pause = paused
         self._archive = []
         self._p = mplayer.Player()
         threading.Thread.__init__(self)
@@ -45,21 +47,26 @@ class Player(threading.Thread):
         """append new entry to playlist
         """
         if command == "skip":
-            self.play_next()
+            self._pause = False
+            if not self._p.paused:
+                self._p.pause()
+            return;
         elif command == "pause":
             self._pause = not self._pause
-            self._p.pause()
+            if self._p.paused != self._pause:
+                self._p.pause()
+            return;
         elif youtube.validate(command):
             self._playlist.append(command)
             print "appending %s to playlist" %command
+            return;
         elif audiourl.validate(command):
             self._playlist.append(command)
             print "appending %s to playlist" %command
 
     def play_next(self):
-        if self._current:
-            self._current = self._next
-        else:
+        self._current = self._next
+        if not self._current:
             self._current = self._fetch_next()
         print "playing %s" %self._current
         self._p.loadfile(self._current)
@@ -76,16 +83,15 @@ class Player(threading.Thread):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Webdownloarding music-player')
     parser.add_argument('-p','--playlist' , help='playlist-file', default='None')
+    parser.add_argument('--paused' , help="start paused, input pause to start playing", action="store_true")
     args = parser.parse_args()
     l = []
     if args.playlist:
         with open(args.playlist) as pl:
-            r = pl.read()
-            while r != "":
-                l.append(r)
-                r = pl.read()
-    p = Player(l)
+            l = [ line.rstrip() for line in pl ]
+    p = Player(playlist=l, paused=args.paused)
     p.start()
     while True:
         s = raw_input()
         p.append(s)
+
