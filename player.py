@@ -4,13 +4,15 @@ from time import sleep
 import threading
 import sys
 import audiourl
+import argparse
 
 class Player(threading.Thread):
     """Docstring for Player """
 
-    def __init__(self, playlist):
+    def __init__(self, playlist=[]):
         """"""
         self._playlist = playlist
+        self._pause = False
         self._archive = []
         self._p = mplayer.Player()
         threading.Thread.__init__(self)
@@ -26,7 +28,10 @@ class Player(threading.Thread):
         if self._playlist == []:
             self._playlist = self._archive
             self._archive = []
+        if self._playlist == []:
+            return youtube.dl_audiostream("https://www.youtube.com/watch?v=oHg5SJYRHA0", path="music")
         current = self._playlist.pop(0)
+
         if youtube.validate(current):
             self._archive.append(current)
             return youtube.dl_audiostream(current, path="music")
@@ -41,6 +46,9 @@ class Player(threading.Thread):
         """
         if command == "skip":
             self.play_next()
+        elif command == "pause":
+            self._pause = not self._pause
+            self._p.pause()
         elif youtube.validate(command):
             self._playlist.append(command)
             print "appending %s to playlist" %command
@@ -61,12 +69,22 @@ class Player(threading.Thread):
 
     def run(self):
         while True:
-            if self._p.percent_pos < 1:
+            if not self._pause and self._p.paused:
                 self.play_next()
             sleep(1)
 
 if __name__ == '__main__':
-    p = Player(["https://www.youtube.com/watch?v=P9spezXhJuU", "https://www.youtube.com/watch?v=i4BYMvVvMg0", "https://www.youtube.com/watch?v=-1z6M4sZmQ0"])
+    parser = argparse.ArgumentParser(description='Webdownloarding music-player')
+    parser.add_argument('-p','--playlist' , help='playlist-file', default='None')
+    args = parser.parse_args()
+    l = []
+    if args.playlist:
+        with open(args.playlist) as pl:
+            r = pl.read()
+            while r != "":
+                l.append(r)
+                r = pl.read()
+    p = Player(l)
     p.start()
     while True:
         s = raw_input()

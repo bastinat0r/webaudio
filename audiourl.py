@@ -1,4 +1,5 @@
 import urllib
+import re
 
 def retrieve_url(url, path='./'):
     try:
@@ -8,6 +9,6 @@ def retrieve_url(url, path='./'):
         print e
         return None
 def validate(url):
-    if url.match("^(http://|https://|ftp://).+\\..+(mp3|m4a|ogg|acc)$"):
+    if re.compile("^(http://|https://|ftp://).+\\..+(mp3|m4a|ogg|acc)$").match(url):
         return True
     return False

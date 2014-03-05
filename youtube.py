@@ -1,4 +1,5 @@
 import pafy
+import os.path
 
 def dl_audiostream(url, path=''):
     """download audiostream from youtube
@@ -11,6 +12,8 @@ def dl_audiostream(url, path=''):
     audio = video.getbestaudio()
     if path != '':
         path = "%s/%s" %(path, audio.filename)
+    if os.path.isfile(path):
+        return path
     name = audio.download(filepath=path, quiet=True)
     print "downloaded file %s" %name
     return name
