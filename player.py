@@ -47,14 +47,9 @@ class Player(threading.Thread):
         """append new entry to playlist
         """
         if command == "skip":
-            self._pause = False
-            if not self._p.paused:
-                self._p.pause()
-            return;
+            self.play_next()
         elif command == "pause":
             self._pause = not self._pause
-            if self._p.paused != self._pause:
-                self._p.pause()
             return;
         elif youtube.validate(command):
             self._playlist.append(command)
@@ -70,13 +65,17 @@ class Player(threading.Thread):
             self._current = self._fetch_next()
         print "playing %s" %self._current
         self._p.loadfile(self._current)
-        self._p.pause()
+        self._pause = False
+        if self._p.paused:
+            self._p.pause()
         self._next = self._fetch_next()
 
 
     def run(self):
         while True:
-            if not (self._pause and self._p.paused):
+            if self._p.paused != self._pause:
+                self._p.pause()
+            if not (self._p.percent_pos >= 0):
                 self.play_next()
             sleep(1)
 
