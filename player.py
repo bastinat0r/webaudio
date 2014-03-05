@@ -76,7 +76,7 @@ class Player(threading.Thread):
 
     def run(self):
         while True:
-            if not self._pause and self._p.paused:
+            if not (self._pause and self._p.paused):
                 self.play_next()
             sleep(1)
 
