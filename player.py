@@ -55,6 +55,14 @@ class Player(threading.Thread):
         elif command == "pause":
             self._pause = not self._pause
             return;
+        elif command.split("=")[0] == "volume":
+            f = float(command.split("=")[1])
+            if f > 100.0:
+                f = 100.0
+            if f < 0.0:
+                f = 0.0
+            self._p.volume = f
+            return;
         elif youtube.validate(command):
             self._playlist.append(command)
             print "appending %s to playlist" %command
