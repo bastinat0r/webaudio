@@ -33,10 +33,11 @@ class Player(threading.Thread):
         """
         if self._playlist == []:
             self._playlist = self._archive
+            self._playlist.reverse() # reverse because stack
             self._archive = []
         if self._playlist == []:
             return youtube.dl_audiostream("https://www.youtube.com/watch?v=oHg5SJYRHA0", path="music")
-        current = self._playlist.pop(0)
+        current = self._playlist.pop()
 
         if youtube.validate(current):
             self._archive.append(current)
